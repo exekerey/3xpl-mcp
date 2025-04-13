@@ -6,40 +6,25 @@
 
 Allows LLMs to interact with data on **48** blockchains.
 
+This repository can also be an example of 3xpl JSON API usage, see details in the code.
+
+[//]: # (demo video from Claude)
+
 ## List of available tools
 
-| name                                | description                                                                                                    |
-|-------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| resolve_ens_domain                  | resolves an ENS domain to a regular address                                                                    |
-| detect_blockchains                  | retrieve a list of blockchains on which a transaction/address is present                                       |
-| get_transaction_info                | get transaction information with provided hash in specified blockchain                                         | 
-| get_address_info                    | retrieve information for provided address in specified blockchain                                              | 
-| get_batch_addresses_info            | retrieve information for provided multiple addresses in specified blockchain                                   |
-| get_block_info                      | get block info by height in provided blockchain                                                                | 
-| get_latest_block                    | get latest block height in specified blockchain                                                                | 
-| get_average_fee_24h_usd             | retrieves average transaction fee for last 24 hours in specified blockchain                                    |
-| get_exchange_rate                   | retrieve exchange rate for native currency in specified blockchain for current moment in provided fiat ticker* |
-| get_transaction_count_24h           | retrieve number of transactions in last 24h for provided blockchain                                            |
-| get_address_transactions_for_period | retrieve the transaction of an address for a certain period of time - segment                                  |
+| name                     | description                                                                                                                               | status |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|--------|
+| resolve_ens_domain       | resolves an ENS domain to a regular address                                                                                               | ✅      | 
+| detect_blockchains       | retrieve a list of blockchains on which a transaction/address is present                                                                  | ✅      | 
+| get_latest_block         | get latest block height in specified blockchain                                                                                           | ✅      |  
+| get_average_fee_24h_usd  | retrieves average transaction fee for last 24 hours in specified blockchain in US dollars.                                                | ✅      | 
+| get_mempool_events_count | get the number of unconfirmed events(transfers, inputs/outputs, not transactions) at the moment in the memory pool of provided blockchain | ✅      | 
+| get_events_count_24h     | retrieve number of events(transfers, inputs/outputs, not whole transactions) in last 24h for provided blockchain                          | ✅      | 
+| get_block_overview       | extract short summary about a block in provided blockchain                                                                                | ✅      | 
+| get_address_overview     | extract short summary about an address in provided blockchain                                                                             | ✅      | 
+| get_transaction_overview | extract short summary about a transaction in provided blockchain                                                                          | ⏳      | 
 
-[//]: # (                           | supported_blockchains                                                                                          | get list of support blockchains by 3xpl API |)
-
-[//]: # (## List of prompts)
-
-[//]: # (| name                   | description                                               |)
-
-[//]: # (|------------------------|-----------------------------------------------------------|)
-
-[//]: # (| analyze_address_prompt | prompt for providing helpful information about an address |)
-
-[//]: # (## List of resources)
-
-[//]: # (| name                       | description                                               |)
-
-[//]: # (|----------------------------|-----------------------------------------------------------|)
-
-[//]: # (| transactions_endpoint_docs | detailed documentation of `/transaction` endpoint on 3xpl |)
-
+List will expand soon, stay tuned!
 
 *might be inaccurate, see the API docs and policy for details.
 

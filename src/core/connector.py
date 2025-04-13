@@ -49,9 +49,10 @@ async def fetch_transaction(blockchain: str, transaction_hash: str):
         "from": "all",
         "limit": 1000,  # too high limit though
         "page": 0,
+        "mixins": "stats"
     }
     response = await client.get(
-        f"{config.txpl_api_base_url}/{blockchain}/address/{transaction_hash}",
+        f"{config.txpl_api_base_url}/{blockchain}/transaction/{transaction_hash}",
         params=params
     )
     response.raise_for_status()
