@@ -15,4 +15,4 @@ async def resolve_ens_domain(domain: str) -> str:
             if entity != "address":
                 break
             return link.replace(f"https://3xpl.com/{blockchain}/{entity}/", "")
-    return "There is no addresses linked to this domain"
+    return "There are no addresses linked to this domain"
