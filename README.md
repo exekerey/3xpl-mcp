@@ -22,11 +22,46 @@ This repository can also be an example of 3xpl JSON API usage, see details in th
 | get_events_count_24h     | retrieve number of events(transfers, inputs/outputs, not whole transactions) in last 24h for provided blockchain                          | ✅      | 
 | get_block_overview       | extract short summary about a block in provided blockchain                                                                                | ✅      | 
 | get_address_overview     | extract short summary about an address in provided blockchain                                                                             | ✅      | 
-| get_transaction_overview | extract short summary about a transaction in provided blockchain                                                                          | ⏳      | 
+| get_transaction_overview | extract short summary about a transaction in provided blockchain(to be improved)                                                          | ✅      | 
 
 List will expand soon, stay tuned!
 
-*might be inaccurate, see the API docs and policy for details.
+[//]: # (*might be inaccurate, see the API docs and policy for details.)
+
+## Installation
+
+```shell
+# get the repository
+git clone https://github.com/exekerey/3xpl-mcp.git
+cd 3xpl-mcp
+
+# create and activate virtual environment
+uv venv 
+source .venv/bin/activate
+
+# install dependencies
+uv pip install -e .
+```
+
+MCP configuration:
+
+```json
+{
+  "3xpl_API": {
+    "command": "uv",
+    "args": [
+      "run",
+      "--with",
+      "mcp[cli]",
+      "mcp",
+      "run",
+      "/{:path_to_cloned}/3xpl_mcp/main.py"
+    ]
+  }
+}
+```
+
+*Note: if MCP server doesn't start you might need to provide full path to uv in the `command` field.
 
 ## Contribution
 
