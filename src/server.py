@@ -1,14 +1,7 @@
 from mcp.server import FastMCP
 
-import prompts  # noqa
-import resources  # noqa
-import tools  # noqa
+from src.tools import init_tools
 
 server = FastMCP("3xpl_API")
+init_tools(server)
 
-
-# server tools and stuff declarations
-
-@server.tool()
-def stuff():
-    return 1
