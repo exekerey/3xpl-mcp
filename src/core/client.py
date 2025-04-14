@@ -1,11 +1,13 @@
 import json
-
+import logging
 from httpx import AsyncClient
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class CustomClient(AsyncClient):
     async def request(self, method, url, *args, **kwargs):
-        print(url)
+        logger.debug(f"Request URL: {url}")
         response = await super().request(method, url, *args, **kwargs)
         saved_content = response.content
         try:
