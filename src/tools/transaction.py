@@ -20,7 +20,7 @@ async def get_transactions_count_24h(blockchain: str):
 async def get_transaction_fee_24h_usd(blockchain: str) -> int:
     """
     Get average transaction fee(recommended for quick confirmation) in the given blockchain for last 24 hours in USD.
-    :param blockchain: Lowercase blockchain name with dashes instead or spaces.
+    :param blockchain: Lowercase blockchain name with dashes instead of spaces.
     :return: the average fee for transactions in last 24 hours in USD.
     """
     stats = await fetch_stats(blockchain)
