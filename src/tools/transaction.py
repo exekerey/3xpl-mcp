@@ -8,21 +8,44 @@ async def get_transaction_info(blockchain: str, transaction_hash: str):
 
 
 async def get_transactions_count_24h(blockchain: str):
+    """
+    Get count of individual transfers(not transactions) in the given blockchain for last 24 hours.
+    :param blockchain: Lowercase blockchain name with dashes instead of spaces.
+    :return: Dictionary with modules and corresponding number of transfers for last 24 hours.
+    """
     stats = await fetch_stats(blockchain)
     return stats['data']['blockchains'][blockchain]['events_24h']
 
 
-async def get_transaction_fee_24h_usd(blockchain: str):
+async def get_transaction_fee_24h_usd(blockchain: str) -> int:
+    """
+    Get average transaction fee(recommended for quick confirmation) in the given blockchain for last 24 hours in USD.
+    :param blockchain: Lowercase blockchain name with dashes instead or spaces.
+    :return: the average fee for transactions in last 24 hours in USD.
+    """
     stats = await fetch_stats(blockchain)
     return stats['data']['blockchains'][blockchain]['average_fee_24h']['usd']
 
 
-async def get_mempool_transactions_count(blockchain: str):
+async def get_mempool_transactions_count(blockchain: str) -> dict[str, int]:
+    """
+    Get current count of individual transfers(not transactions) in requested blockchain
+    :param blockchain: Lowercase blockchain name with dashes instead of spaces.
+    :return: Dictionary with modules and corresponding number of transfers in memory pool of provided blockchain.
+    """
     stats = await fetch_stats(blockchain)
     return stats['data']['blockchains'][blockchain]['mempool_events']
 
 
 async def get_transaction_overview(blockchain: str, transaction_hash: str):
+    """
+    Get main information about a transaction in a certain blockchain by its hash(id)
+    :param blockchain: Lowercase blockchain name with dashes instead or spaces.
+    :param transaction_hash: Hash of the transaction to get information about, must be plain string.
+    :return: Description with main details about provided transaction in given blockchain.
+    Details such as included block, number of confirmations, number of individual transfers in it
+    """
+
     transaction_info = await fetch_transaction(blockchain, transaction_hash)
     best_block = transaction_info['mixins']['stats'][blockchain]['best_block']
     included_block = transaction_info['data']['transaction']['block']

@@ -3,6 +3,13 @@ from src.core.utils import reformat_time
 
 
 async def get_block_overview(blockchain: str, height: int):
+    """
+    Get main information about a block in requested blockchain.
+    :param blockchain: Lowercase blockchain name with dashes instead of spaces.
+    :param height: The height of the requested block.
+    :return: Description with main details about requested block within provided blockchain.
+    Details include number of confirmations, block hash, block time and number of individual transfers within the block.
+    """
     block_info = await fetch_block(blockchain, height)
 
     best_block = block_info['mixins']['stats'][blockchain]['best_block']
@@ -30,7 +37,12 @@ async def get_block_info(blockchain: str, height: int):
     return block_info
 
 
-async def get_latest_block(blockchain: str):  # specify that it's id?
+async def get_latest_block(blockchain: str):
+    """
+    Fetch the height(block id) of the latest(best) block in the requested blockchain.
+    :param blockchain: Lowercase blockchain name with dashes instead of spaces.
+    :return: Returns a number which is the latest block id in the provided blockchain.
+    """
     stats = await fetch_stats(blockchain)
     return stats['data']['blockchains'][blockchain]['best_block']  # add time?
 

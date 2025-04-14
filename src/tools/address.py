@@ -3,6 +3,13 @@ from src.core.utils import format_amount, reformat_time
 
 
 async def get_address_overview(blockchain: str, address: str) -> str:
+    """
+    Get main information about an address in requested blockchain.
+    :param blockchain: Lowercase blockchain name with dashes instead of spaces.
+    :param address: A plain address to get information about. Must not be ENS domain.
+    :return: Description with main details of provided address in provided blockchain,
+    such as last transaction, number of pending transactions, balances in whitelisted tokens.
+    """
     # TODO: clean up this mess.
 
     address_info = await fetch_address(blockchain, address)
