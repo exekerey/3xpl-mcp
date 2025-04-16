@@ -1,8 +1,12 @@
 import json
+import logging
 
 from httpx import AsyncClient
 
 from src.core.config import config
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 class CustomClient(AsyncClient):
@@ -12,6 +16,7 @@ class CustomClient(AsyncClient):
             params = dict()
         params['token'] = config.threexpl_api_key
         kwargs['params'] = params
+        logger.debug(f"Request URL: {url}")
         response = await super().request(method, url, *args, **kwargs)
         saved_content = response.content
         try:
