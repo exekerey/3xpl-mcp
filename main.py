@@ -1,4 +1,4 @@
-from src.server import server  # noqa
+from src.server import server
 
 if __name__ == "__main__":
     import sys
