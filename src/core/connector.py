@@ -5,14 +5,14 @@ from src.core.config import config
 # todo: removing context from each request would be nice for keeping context clean.
 async def fetch_stats(blockchain: str):
     response = await client.get(
-        f"{config.txpl_api_base_url}/?from={blockchain}")
+        f"{config.threexpl_api_base_url}/?from={blockchain}")
     response.raise_for_status()
     return response.json()
 
 
 async def search_string(data: str):
     response = await client.get(
-        f"{config.txpl_api_base_url}/search?q={data}"
+        f"{config.threexpl_api_base_url}/search?q={data}"
     )
     response.raise_for_status()
     return response.json()
@@ -36,7 +36,7 @@ async def fetch_address(blockchain: str, address: str, use_case: str = "address_
         raise ValueError("unknown use_case")
 
     response = await client.get(
-        f"{config.txpl_api_base_url}/{blockchain}/address/{address}",
+        f"{config.threexpl_api_base_url}/{blockchain}/address/{address}",
         params=params,
     )
     response.raise_for_status()
@@ -52,7 +52,7 @@ async def fetch_transaction(blockchain: str, transaction_hash: str):
         "mixins": "stats"
     }
     response = await client.get(
-        f"{config.txpl_api_base_url}/{blockchain}/transaction/{transaction_hash}",
+        f"{config.threexpl_api_base_url}/{blockchain}/transaction/{transaction_hash}",
         params=params
     )
     response.raise_for_status()
@@ -68,7 +68,7 @@ async def fetch_block(blockchain: str, height: int):
         "mixins": "stats",
     }
     response = await client.get(
-        f"{config.txpl_api_base_url}/{blockchain}/block/{height}",
+        f"{config.threexpl_api_base_url}/{blockchain}/block/{height}",
         params=params
     )
     response.raise_for_status()

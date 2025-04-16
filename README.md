@@ -47,21 +47,29 @@ MCP configuration:
 
 ```json
 {
-  "3xpl_API": {
-    "command": "uv",
-    "args": [
-      "run",
-      "--with",
-      "mcp[cli]",
-      "mcp",
-      "run",
-      "/{:path_to_cloned}/3xpl_mcp/main.py"
-    ]
+  "mcpServers": {
+    "3xpl_API": {
+      "command": "/Users/danial/.local/bin/uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp[cli]",
+        "mcp",
+        "run",
+        "/Users/danial/3xpl_mcp/main.py"
+      ],
+      "env": {
+        "THREEXPL_API_KEY": ""
+      }
+    }
   }
 }
 ```
+**Note*: Set your API key from [3xpl](https://3xpl.com/data/json-api) to use the main API. 
+If the `THREEXPL_API_KEY` field in the config file is left blank, 
+the MCP server will use the sandbox API, which has rate limits. 
 
-*Note: if MCP server doesn't start you might need to provide full path to uv in the `command` field.
+**Note 2*: if MCP server doesn't start you might need to provide full path to uv in the `command` field.
 
 ## Contribution
 
