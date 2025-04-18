@@ -4,15 +4,24 @@ from src.core.config import config
 
 # todo: removing context from each request would be nice for keeping context clean.
 async def fetch_stats(blockchain: str):
+    params = {
+        "from": blockchain
+    }
     response = await client.get(
-        f"{config.threexpl_api_base_url}/?from={blockchain}")
+        f"{config.threexpl_api_base_url}/",
+        params=params
+    )
     response.raise_for_status()
     return response.json()
 
 
 async def search_string(data: str):
+    params = {
+        "q": data
+    }
     response = await client.get(
-        f"{config.threexpl_api_base_url}/search?q={data}"
+        f"{config.threexpl_api_base_url}/search",
+        params=params
     )
     response.raise_for_status()
     return response.json()
