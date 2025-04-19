@@ -1,0 +1,3 @@
+"""
+Module for MCP resources.
+"""
