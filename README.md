@@ -49,14 +49,14 @@ MCP configuration:
 {
   "mcpServers": {
     "3xpl_API": {
-      "command": "/Users/danial/.local/bin/uv",
+      "command": "uv",
       "args": [
         "run",
         "--with",
         "mcp[cli]",
         "mcp",
         "run",
-        "/Users/danial/3xpl_mcp/main.py"
+        "{:path_to_cloned}/3xpl_mcp/main.py"
       ],
       "env": {
         "THREEXPL_API_KEY": ""
