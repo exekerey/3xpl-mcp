@@ -24,7 +24,14 @@ This repository can also be an example of 3xpl JSON API usage, see details in th
 | get_address_overview     | extract short summary about an address in provided blockchain                                                                             | ✅      | 
 | get_transaction_overview | extract short summary about a transaction in provided blockchain(to be improved)                                                          | ✅      | 
 
-List will expand soon, stay tuned!
+## List of available prompts
+
+| name                | description                                                               |
+|---------------------|---------------------------------------------------------------------------|
+| get_blockchain_info | makes LLM dig deeper into data for providing the most fulfilled response. |
+
+Lists will expand soon, stay tuned!
+
 
 [//]: # (*might be inaccurate, see the API docs and policy for details.)
 
@@ -65,9 +72,10 @@ MCP configuration:
   }
 }
 ```
-**Note*: Set your API key from [3xpl](https://3xpl.com/data/json-api) to use the main API. 
-If the `THREEXPL_API_KEY` field in the config file is left blank, 
-the MCP server will use the sandbox API, which has rate limits. 
+
+**Note*: Set your API key from [3xpl](https://3xpl.com/data/json-api) to use the main API.
+If the `THREEXPL_API_KEY` field in the config file is left blank,
+the MCP server will use the sandbox API, which has rate limits.
 
 **Note 2*: if MCP server doesn't start you might need to provide full path to uv in the `command` field.
 

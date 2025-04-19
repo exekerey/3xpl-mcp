@@ -11,4 +11,4 @@ async def detect_blockchains(data: str) -> [str]:
     blockchain_links = search_results.get('data', {}).get('results')
     if not blockchain_links:
         return []
-    return blockchain_links.keys()
+    return list(blockchain_links.keys())
