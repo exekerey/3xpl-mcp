@@ -23,6 +23,7 @@ This repository can also be an example of 3xpl JSON API usage, see details in th
 | get_block_overview              | extract short summary about a block in provided blockchain                                                                                | ✅      | 
 | get_address_overview            | extract short summary about an address in provided blockchain                                                                             | ✅      | 
 | get_transaction_overview        | extract short summary about a transaction in provided blockchain(to be improved)                                                          | ✅      | 
+| list_blockchains_and_modules    | get a list of blockchains and their modules with module descriptions                                                                      | ✅      | 
 | aggregate_block_transactions    | aggregate transactions in a block                                                                                                         | ⏳      |
 | aggregate_transaction_transfers | aggregate individual transfers in a transactions                                                                                          | ⏳      |
 | aggregate_address_balances      | aggregate balances for an address with                                                                                                    | ⏳      |
