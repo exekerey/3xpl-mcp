@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal, getcontext
 
@@ -42,19 +43,33 @@ async def collect_all_pages(async_fetcher, data_keys: list[str], get_currency_in
             currency_library = data['library']['currencies']
             rates_library = data['library']['rates']
 
-            if rates_library.get('now'):
-                rates = rates_library['now']
-            else:
-                rates = {}
-                for _, rate_info in rates_library.items():
-                    rates.update(rate_info)
+            currency_timestamp_rates = defaultdict(dict)  # {ethereum: {now: 123123, 2077-12-12: 12314123}}
+            for timestamp, currencies_rates in rates_library.items():
+                for currency, rate_info in currencies_rates.items():
+                    fiat_ticker = list(rate_info.keys())[0]
+                    if rate_info[fiat_ticker] is None:
+                        continue
+                    currency_timestamp_rates[currency].update({timestamp: rate_info})
 
             for data_chunk in required_data:
-                data_chunk['currency_symbol'] = currency_library[data_chunk['currency']]['symbol']
+                currency_id = data_chunk['currency']
 
-                # maybe instead of verification - provide rate? Rate at the time of the transaction
+                data_chunk['currency_symbol'] = currency_library[currency_id]['symbol']
+                data_chunk['currency_decimals'] = currency_library[currency_id]['decimals']
 
-                data_chunk['currency_verified'] = True if rates[data_chunk['currency']]['usd'] is not None else False
+                # different processing of rates depending on the endpoint:
+                #  - blocks - get from first date, no dates in events.
+                #  - balances - get from `now`, no dates in events.
+                #  - address transactions/mempool - get from rates from according timestamp from event itself.
+                if currency_timestamp_rates[currency_id]:
+                    data_chunk['currency_verified'] = True
+
+                    if data_chunk.get('timestamp'):
+                        data_chunk['exchange_rate'] = currency_timestamp_rates[currency_id][data_chunk['timestamp']]
+                    else:
+                        data_chunk['exchange_rate'] = currency_timestamp_rates[currency_id]['now']
+                else:
+                    data_chunk['currency_verified'] = False
 
         all_pages.extend(required_data)
 

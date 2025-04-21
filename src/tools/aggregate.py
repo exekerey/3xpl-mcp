@@ -29,12 +29,11 @@ from src.core.utils import collect_all_pages
 #  `fn.__doc__ = "description"` and this could be reducing some duplication.
 #  so having modularizing descriptions based on fields, and pasting that via formatting if it's needed for the tool.
 
-# TODO: number of decimals in a currency, for llm to convert it into human-understandable format
-#  (5 bil satoshis vs 50 btc)
 
 # TODO: having usd rate in table for llm to be able to operate within the dimension of fiat value.
 #  "can you give me the biggest in terms of usd transaction of this address?"
 #  (so even 5 wei > 12312314213123123123 shcoin)
+# todo: document decimals and exchange rate.
 
 async def aggregate_block_transfers(blockchain: str, module: str, height: int, sql_query: str):
     """
@@ -71,7 +70,7 @@ async def aggregate_block_transfers(blockchain: str, module: str, height: int, s
         conn,
         {"transaction_hash": "TEXT", "address": "TEXT", "currency_id": "TEXT",
          "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT", "currency_symbol": "TEXT",
-         "currency_verified": "BOOLEAN"},
+         "currency_verified": "BOOLEAN", "currency_decimals": "TINYINT", "exchange_rate": "REAL"},
         all_block_events)
     aggregate = get_aggregate(conn, sql_query)
     return aggregate
@@ -112,7 +111,8 @@ async def aggregate_transaction_transfers(blockchain: str, module: str, transact
     unwrap_into_table(
         conn,
         {"address": "TEXT", "currency_id": "TEXT", "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT",
-         "currency_symbol": "TEXT", "currency_verified": "BOOLEAN"},
+         "currency_symbol": "TEXT", "currency_verified": "BOOLEAN", "currency_decimals": "TINYINT",
+         "exchange_rate": "REAL"},
         all_tx_events,
     )
     aggregate = get_aggregate(conn, sql_query)
@@ -156,7 +156,7 @@ async def aggregate_address_mempool(blockchain: str, module: str, address: str, 
         conn,
         {"transaction_hash": "TEXT", "time": "TEXT", "currency_id": "TEXT",
          "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT", "currency_symbol": "TEXT",
-         "currency_verified": "BOOLEAN"},
+         "currency_verified": "BOOLEAN", "currency_decimals": "TINYINT", "exchange_rate": "REAL"},
         all_mempool_events)
     aggregate = get_aggregate(conn, sql_query)
     return aggregate
@@ -207,8 +207,9 @@ async def aggregate_address_balances(blockchain: str, module: str, address: str,
         [], get_currency_info=False, stop_after_first=module.endswith("-main")
     )
     unwrap_into_table(
-        conn,
-        {"currency_id": "TEXT", "symbol": "TEXT", "decimals": "INT", "balance": "REAL", "is_verified": "BOOLEAN"},
+        conn,  # TODO: renaming decimals -> currency decimals as in others?
+        {"currency_id": "TEXT", "symbol": "TEXT", "decimals": "INT", "balance": "REAL", "is_verified": "BOOLEAN",
+         "exchange_rate": "REAL"},
         all_balances
     )
     aggregate = get_aggregate(conn, sql_query)
@@ -254,7 +255,7 @@ async def aggregate_address_transfers(blockchain: str, module: str, address: str
         conn,
         {"block": "INT", "transaction_hash": "TEXT", "time": "TEXT", "currency_id": "TEXT",
          "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT", "currency_symbol": "TEXT",
-         "currency_verified": "BOOLEAN"},
+         "currency_verified": "BOOLEAN", "currency_decimals": "TINYINT", "exchange_rate": "REAL"},
         all_address_events
     )
     aggregate = get_aggregate(conn, sql_query)
