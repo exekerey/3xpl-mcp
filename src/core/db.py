@@ -13,12 +13,10 @@ allowed_functions = {
 def unwrap_into_table(conn: sqlite3.Connection, keys: dict, data: list[dict]):
     cols = ', '.join(f'{name} {type_}' for name, type_ in keys.items())
     conn.execute(f'DROP TABLE IF EXISTS data')
-    print(cols, file=sys.stderr)
     conn.execute(f'CREATE TABLE data ({cols})')
     cols_names = ', '.join(keys)
     placeholders = ', '.join('?' for _ in keys)
     insert_sql = f'INSERT INTO data ({cols_names}) VALUES ({placeholders})'
-    print(insert_sql, file=sys.stderr)
     for row in data:
         values = tuple(row.get(col) for col in keys)
         conn.execute(insert_sql, values)
@@ -47,7 +45,7 @@ def validate_sql(conn, query):
         raise sqlite3.Error(f"You have provided an invalid sqlite query: {str(e)}")
 
 
-def setup_sqlite_connection():
+def setup_sqlite_connection() -> sqlite3.Connection:
     # concurrency?
     conn = sqlite3.connect(":memory:")  # temp conn
     # conn.enable_load_extension(True)
@@ -55,7 +53,7 @@ def setup_sqlite_connection():
     return conn
 
 
-def get_aggregate(conn, sql_query):
+def get_aggregate(conn: sqlite3.Connection, sql_query: str):
     # maybe transform this into usual table, so model has better performance? TODO
     conn.set_authorizer(auth_cb)
     cur = conn.cursor()

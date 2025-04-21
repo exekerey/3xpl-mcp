@@ -91,11 +91,11 @@ async def fetch_block(blockchain: str, height: int):
 
 async def fetch_block_events(blockchain: str, module: str, height: int, limit: int = 1000, page: int = 0):
     params = {
-        "data": "events",
+        "data": "block,events",
         "limit": limit,
         "page": page,
         "from": module,
-        "library": "currencies",
+        "library": "currencies,rates(usd)",
     }
     response = await client.get(
         f"{config.threexpl_api_base_url}/{blockchain}/block/{height}",
@@ -112,7 +112,7 @@ async def fetch_transaction_events(blockchain: str, module: str, transaction_has
         "limit": limit,
         "page": page,
         "from": module,
-        "library": "currencies"
+        "library": "currencies,rates(usd)"
     }
 
     response = await client.get(
@@ -125,6 +125,7 @@ async def fetch_transaction_events(blockchain: str, module: str, transaction_has
 
 # can be multiple separated, or can be merged though.
 async def fetch_address_data(blockchain: str, module: str, address: str, source: AddressDataSource,
+                             # segment: Optional[str] = None,
                              limit: int = 1000, page: int = 0):
     params = {
         "data": source.value,
@@ -133,6 +134,8 @@ async def fetch_address_data(blockchain: str, module: str, address: str, source:
         "from": module,
         "library": "currencies,rates(usd)",
     }
+    # if segment is not None:
+    #     params["segment"] = segment
 
     response = await client.get(
         f"{config.threexpl_api_base_url}/{blockchain}/address/{address}",

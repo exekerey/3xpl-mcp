@@ -1,5 +1,4 @@
 import functools
-import sys
 
 from src.core.connector import fetch_block_events, fetch_transaction_events, fetch_address_data, \
     fetch_address_balances
@@ -11,16 +10,31 @@ from src.core.utils import collect_all_pages
 # current state of actions:
 #  test each tool with Claude, see if it runs, get some edge cases
 
-# TODO: tune tool descriptions better - few issues:
+# todo: tune tool descriptions better - few issues:
 #           - not using is_verified when checking balances
-#           - not passing modules correctly unless provided with exact module name(need to make it to look up modules though?)
+#           - not passing modules correctly unless provided with exact module name
+#           (need to make it to look up modules though?)
 
-# todo: "can you give me the biggest in terms of usd transaction of this address?" There is no rates fetched.
-# todo: segmenting on an address transfers. For example allowing inputting 30 days range and querying stuff on this range.
+# TODO: segmenting on an address transfers.
+#  For example allowing inputting 30 days range and querying stuff on this range.
 #  And then aggregating.
-# TODO: extra has more meanings and you gotta paste that somehow into tools.
-# TODO: docstrings actually can be assigned separately - `func.__doc__ = "description"` and this could be reducing some duplication.
+#  upd: non-trivial feature. Might require O(segments + page(segment_i)) of requests
 
+# TODO: when going out of allowed range for pages, notifying LLM about boundaries.
+#   for example telling the time of first event
+
+# TODO: extra has more meanings and you gotta paste that somehow into tools.
+
+# todo: docstrings actually can be assigned separately:
+#  `fn.__doc__ = "description"` and this could be reducing some duplication.
+#  so having modularizing descriptions based on fields, and pasting that via formatting if it's needed for the tool.
+
+# TODO: number of decimals in a currency, for llm to convert it into human-understandable format
+#  (5 bil satoshis vs 50 btc)
+
+# TODO: having usd rate in table for llm to be able to operate within the dimension of fiat value.
+#  "can you give me the biggest in terms of usd transaction of this address?"
+#  (so even 5 wei > 12312314213123123123 shcoin)
 
 async def aggregate_block_transfers(blockchain: str, module: str, height: int, sql_query: str):
     """
@@ -149,7 +163,6 @@ async def aggregate_address_mempool(blockchain: str, module: str, address: str, 
 
 
 async def aggregate_address_balances(blockchain: str, module: str, address: str, sql_query: str):
-    # TODO: real numbers here? Cuz is also inoperatable.
     """
     Aggregate *balance info* for an address in requested blockchain within requested module in a sqlite table.
     Schema:
@@ -193,7 +206,6 @@ async def aggregate_address_balances(blockchain: str, module: str, address: str,
                           source=AddressDataSource.balances),
         [], get_currency_info=False, stop_after_first=module.endswith("-main")
     )
-    print(all_balances, file=sys.stderr)
     unwrap_into_table(
         conn,
         {"currency_id": "TEXT", "symbol": "TEXT", "decimals": "INT", "balance": "REAL", "is_verified": "BOOLEAN"},
