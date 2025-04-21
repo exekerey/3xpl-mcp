@@ -16,11 +16,10 @@ from src.core.utils import collect_all_pages
 #           - not passing modules correctly unless provided with exact module name(need to make it to look up modules though?)
 
 # todo: "can you give me the biggest in terms of usd transaction of this address?" There is no rates fetched.
-# todo: also there is no names for currencies except when querying balances.
 # todo: segmenting on an address transfers. For example allowing inputting 30 days range and querying stuff on this range.
 #  And then aggregating.
 # TODO: extra has more meanings and you gotta paste that somehow into tools.
-# TODO: currencies should have is_verified when they are in the data(they are always there)
+# TODO: docstrings actually can be assigned separately - `func.__doc__ = "description"` and this could be reducing some duplication.
 
 
 async def aggregate_block_transfers(blockchain: str, module: str, height: int, sql_query: str):
@@ -30,8 +29,11 @@ async def aggregate_block_transfers(blockchain: str, module: str, height: int, s
         table is called data and contains the following columns:
         - transaction_hash: transaction hash as text
         - address: target address of the transfer as text
-        - currency: full currency name in lowercase. Prepended with module name and '/' if not-native currency
+        - currency_id: currency identifier in lowercase. Can be native currency name (e.g. `ethereum`, `bitcoin`)
+            or contract address prefixed with the module name and separated by a slash
+            (e.g. `ethereum-erc-20/0xda...c7` (address shortened for simplicity)
         - currency_symbol: currency symbol/ticker) in uppercase.
+        - currency_verified: boolean indicating whether the currency is widely accepted and listed on major exchanges(indicates that a currency is not a scam or copy)
         - effect: amount in the smallest units as REAL type. Positive if gained, negative if spent.
         - failed: boolean indicating whether transaction failed
         - extra: special mark as text. 'f' for miner fee, 'b' for burnt fee, null for regular transfers
@@ -53,8 +55,9 @@ async def aggregate_block_transfers(blockchain: str, module: str, height: int, s
     )
     unwrap_into_table(
         conn,
-        {"transaction_hash": "TEXT", "address": "TEXT", "currency": "TEXT",
-         "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT", "currency_symbol": "TEXT"},
+        {"transaction_hash": "TEXT", "address": "TEXT", "currency_id": "TEXT",
+         "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT", "currency_symbol": "TEXT",
+         "currency_verified": "BOOLEAN"},
         all_block_events)
     aggregate = get_aggregate(conn, sql_query)
     return aggregate
@@ -67,8 +70,11 @@ async def aggregate_transaction_transfers(blockchain: str, module: str, transact
     Schema:
         table is called data and contains the following columns:
         - address: target address of the transfer as text
-        - currency: full currency name in lowercase. Prepended with module name and '/' if not-native currency
+        - currency_id: currency identifier in lowercase. Can be native currency name (e.g. `ethereum`, `bitcoin`)
+            or contract address prefixed with the module name and separated by a slash
+            (e.g. `ethereum-erc-20/0xda...c7` (address shortened for simplicity)
         - currency_symbol: currency symbol/ticker) in uppercase.
+        - currency_verified: boolean indicating whether the currency is widely accepted and listed on major exchanges(indicates that a currency is not a scam or copy)
         - effect: amount in the smallest units as REAL type. Positive if gained, negative if spent.
         - failed: boolean indicating whether transaction failed
         - extra: special mark as text. 'f' for miner fee, 'b' for burnt fee, null for regular transfers
@@ -91,8 +97,8 @@ async def aggregate_transaction_transfers(blockchain: str, module: str, transact
     )
     unwrap_into_table(
         conn,
-        {"address": "TEXT", "currency": "TEXT", "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT",
-         "currency_symbol": "TEXT"},
+        {"address": "TEXT", "currency_id": "TEXT", "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT",
+         "currency_symbol": "TEXT", "currency_verified": "BOOLEAN"},
         all_tx_events,
     )
     aggregate = get_aggregate(conn, sql_query)
@@ -107,8 +113,11 @@ async def aggregate_address_mempool(blockchain: str, module: str, address: str, 
         table is called data and contains the following columns:
         - transaction_hash: transaction hash as text
         - time: ISO timestamp of the mempool event as text
-        - currency: full currency name in lowercase. Prepended with module name and '/' if not-native currency
+        - currency_id: currency identifier in lowercase. Can be native currency name (e.g. `ethereum`, `bitcoin`)
+            or contract address prefixed with the module name and separated by a slash
+            (e.g. `ethereum-erc-20/0xda...c7` (address shortened for simplicity)
         - currency_symbol: currency symbol/ticker) in uppercase.
+        - currency_verified: boolean indicating whether the currency is widely accepted and listed on major exchanges(indicates that a currency is not a scam or copy)
         - effect: amount in the smallest units as REAL type. Positive if gained, negative if spent.
         - failed: boolean indicating whether transaction failed or null if not applicable
         - extra: special mark as text. 'f' for miner fee, 'b' for burnt fee, null for regular transfers
@@ -131,8 +140,9 @@ async def aggregate_address_mempool(blockchain: str, module: str, address: str, 
     )
     unwrap_into_table(
         conn,
-        {"transaction_hash": "TEXT", "time": "TEXT", "currency": "TEXT",
-         "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT", "currency_symbol": "TEXT"},
+        {"transaction_hash": "TEXT", "time": "TEXT", "currency_id": "TEXT",
+         "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT", "currency_symbol": "TEXT",
+         "currency_verified": "BOOLEAN"},
         all_mempool_events)
     aggregate = get_aggregate(conn, sql_query)
     return aggregate
@@ -144,7 +154,9 @@ async def aggregate_address_balances(blockchain: str, module: str, address: str,
     Aggregate *balance info* for an address in requested blockchain within requested module in a sqlite table.
     Schema:
         table is called data and it contains following columns:
-        - currency: full currency name in lowercase. Prepended with module name and `/` if not-native currency.
+        - currency_id: currency identifier in lowercase. Can be native currency name (e.g. `ethereum`, `bitcoin`)
+            or contract address prefixed with the module name and separated by a slash
+            (e.g. `ethereum-erc-20/0xda...c7` (address shortened for simplicity)
         - symbol: symbol in uppercase(ticker) - can be the same for multiple currencies, so check address or whether it's verified.
         - decimals: number of decimals of the currency.
         - balance: amount of currency on the balance in the smallest unit(that's why you need decimals).
@@ -184,7 +196,7 @@ async def aggregate_address_balances(blockchain: str, module: str, address: str,
     print(all_balances, file=sys.stderr)
     unwrap_into_table(
         conn,
-        {"currency": "TEXT", "symbol": "TEXT", "decimals": "INT", "balance": "REAL", "is_verified": "BOOLEAN"},
+        {"currency_id": "TEXT", "symbol": "TEXT", "decimals": "INT", "balance": "REAL", "is_verified": "BOOLEAN"},
         all_balances
     )
     aggregate = get_aggregate(conn, sql_query)
@@ -192,7 +204,6 @@ async def aggregate_address_balances(blockchain: str, module: str, address: str,
 
 
 async def aggregate_address_transfers(blockchain: str, module: str, address: str, sql_query: str):
-    # TODO: is_verified.
     """
     Aggregate *confirmed individual transfers* for an address in requested blockchain within requested module in a sqlite table.
     Schema:
@@ -200,10 +211,11 @@ async def aggregate_address_transfers(blockchain: str, module: str, address: str
         - block: block height as integer
         - transaction_hash: transaction hash as text
         - time: ISO timestamp of the event as text
-        - currency: currency identifier. Lowercase name if native currency(e.g. `ethereum`, `bitcoin`)
-            or contract address(in lowercase too) prepended with module name and separated by slash
-            (e.g. ethereum-erc-20/0xda...c7(omitted for simplicity)
+        - currency_id: currency identifier in lowercase. Can be native currency name (e.g. `ethereum`, `bitcoin`)
+            or contract address prefixed with the module name and separated by a slash
+            (e.g. `ethereum-erc-20/0xda...c7` (address shortened for simplicity)
         - currency_symbol: currency symbol/ticker) in uppercase.
+        - currency_verified: boolean indicating whether the currency is widely accepted and listed on major exchanges(indicates that a currency is not a scam or copy)
         - effect: amount in the smallest units as REAL type. Positive if gained, negative if spent.
         - failed: boolean indicating whether transaction failed
         - extra: special mark as text. 'f' for miner fee, 'b' for burnt fee, null for regular transfers
@@ -228,8 +240,9 @@ async def aggregate_address_transfers(blockchain: str, module: str, address: str
     # but it has a downside of decreased accuracy.
     unwrap_into_table(
         conn,
-        {"block": "INT", "transaction_hash": "TEXT", "time": "TEXT", "currency": "TEXT",
-         "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT", "currency_symbol": "TEXT"},
+        {"block": "INT", "transaction_hash": "TEXT", "time": "TEXT", "currency_id": "TEXT",
+         "effect": "REAL", "failed": "BOOLEAN", "extra": "TEXT", "currency_symbol": "TEXT",
+         "currency_verified": "BOOLEAN"},
         all_address_events
     )
     aggregate = get_aggregate(conn, sql_query)
