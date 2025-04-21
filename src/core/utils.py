@@ -41,13 +41,19 @@ async def collect_all_pages(async_fetcher, data_keys: list[str], get_currency_in
         if get_currency_info:
             currency_library = data['library']['currencies']
             rates_library = data['library']['rates']
-            first_date = rates_library.keys()[0]
-            rates = rates_library[first_date]
+
+            if rates_library.get('now'):
+                rates = rates_library['now']
+            else:
+                rates = {}
+                for _, rate_info in rates_library.items():
+                    rates.update(rate_info)
 
             for data_chunk in required_data:
                 data_chunk['currency_symbol'] = currency_library[data_chunk['currency']]['symbol']
 
-                # maybe instead of verification - provide rate?
+                # maybe instead of verification - provide rate? Rate at the time of the transaction
+
                 data_chunk['currency_verified'] = True if rates[data_chunk['currency']]['usd'] is not None else False
 
         all_pages.extend(required_data)
