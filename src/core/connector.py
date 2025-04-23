@@ -5,8 +5,6 @@ from src.core.config import config
 from src.core.enums import AddressDataSource
 
 
-# removing `context` field from each request would be nice for keeping response clean.
-# UPD: pointless, as I don't pass the whole response to LLM.
 async def fetch_stats(blockchain: Optional[str] = None):
     params = {
         "from": "all" if blockchain is None else blockchain,
@@ -108,7 +106,7 @@ async def fetch_block_events(blockchain: str, module: str, height: int, limit: i
 async def fetch_transaction_events(blockchain: str, module: str, transaction_hash: str,
                                    limit: int = 1000, page: int = 0):
     params = {
-        "data": "events",
+        "data": "transaction,events",
         "limit": limit,
         "page": page,
         "from": module,

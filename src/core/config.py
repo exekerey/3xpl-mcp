@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic import field_validator
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings
@@ -15,4 +17,5 @@ class Config(BaseSettings):
         return v
 
 
-config = Config(_env_file=".env")
+env_path = Path(__file__).resolve().parents[2] / ".env"
+config = Config(_env_file=env_path)

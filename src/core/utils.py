@@ -37,6 +37,8 @@ async def collect_all_pages(async_fetcher, data_keys: list[str], get_currency_in
         required_data = data
         for key in data_keys:
             required_data = required_data[key]
+            if not required_data:
+                break
 
         if not required_data:
             break
@@ -48,9 +50,7 @@ async def collect_all_pages(async_fetcher, data_keys: list[str], get_currency_in
             currency_timestamp_rates = defaultdict(dict)  # {ethereum: {now: 123123, 2077-12-12: 12314123}}
             for timestamp, currencies_rates in rates_library.items():
                 for currency, rate_info in currencies_rates.items():
-                    fiat_ticker = list(rate_info.keys())[0]
-                    if rate_info[fiat_ticker] is None:
-                        continue
+                    # fiat_ticker = list(rate_info.keys())[0]
                     currency_timestamp_rates[currency].update({timestamp: rate_info})
 
             for data_chunk in required_data:
@@ -69,8 +69,14 @@ async def collect_all_pages(async_fetcher, data_keys: list[str], get_currency_in
                     if data_chunk.get('time'):  # or not data_chunk.get('block'):
                         data_chunk['exchange_rate'] = currency_timestamp_rates[currency_id][data_chunk['time']]['usd']
                     elif not data_chunk.get('block'):
+                        if data['data'].get('block'):
+                            timestamp = data['data']['block']['time']
+                        elif data['data'].get('transaction'):
+                            timestamp = data['data']['transaction']['time']
+                        else:
+                            raise ValueError()
                         data_chunk['exchange_rate'] = \
-                            currency_timestamp_rates[currency_id][data['data']['block']['time']]['usd']
+                            currency_timestamp_rates[currency_id][timestamp]['usd']
                     else:
                         data_chunk['exchange_rate'] = currency_timestamp_rates[currency_id]['now']['usd']
                 else:
