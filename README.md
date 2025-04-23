@@ -36,9 +36,6 @@ This repository can also be an example of 3xpl JSON API usage, see details in th
 |---------------------|---------------------------------------------------------------------------|
 | get_blockchain_info | makes LLM dig deeper into data for providing the most fulfilled response. |
 
-Lists will expand soon, stay tuned!
-
-
 [//]: # (*might be inaccurate, see the API docs and policy for details.)
 
 ## Installation
