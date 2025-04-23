@@ -1,12 +1,15 @@
 import sqlite3
-import sys
 
 allowed_functions = {
     "json_extract", "json_each", "json_array_length", "json_type",
     "json_insert", "json_replace", "json_set", "json_remove",
     "json_valid", "json_quote", "json_object", "json_array",
-    "min", "max", "avg", "sum", "total", "count", "length",
-    "group_concat", "cast", "abs", "replace",
+    "min", "max", "avg", "sum", "total", "count",
+    "length", "lower", "upper", "substr", "trim", "ltrim", "rtrim", "replace",
+    "abs", "round", "cast", "pow", "power", "sqrt", "log", "ln", "log10", "exp", "ceil", "ceiling", "floor",
+    "coalesce", "ifnull", "nullif",
+    "date", "time", "datetime", "strftime",
+    "group_concat"
 }
 
 
