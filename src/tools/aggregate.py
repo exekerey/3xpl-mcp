@@ -45,7 +45,7 @@ async def aggregate_block_transfers(blockchain: str, module: str, height: int, s
         - exchange_rate: exchange rate for the currency in USD. Null if the currency is not listed anywhere yet.
         - effect: amount in the smallest units as REAL type. Positive if the address is receiver, negative if is sender.
         - failed: boolean indicating whether transaction failed
-        - extra: Special marker describing the type of transfer as tet field. Possible values:
+        - extra: Special marker describing the type of transfer as text field. Possible values:
             'r' for block reward
             'f' for miner fee
             'b' for burnt fee
