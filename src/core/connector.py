@@ -1,11 +1,14 @@
+from typing import Optional
+
 from src.core.client import client
 from src.core.config import config
+from src.core.enums import AddressDataSource
 
 
-# todo: removing context from each request would be nice for keeping context clean.
-async def fetch_stats(blockchain: str):
+async def fetch_stats(blockchain: Optional[str] = None):
     params = {
-        "from": blockchain
+        "from": "all" if blockchain is None else blockchain,
+        "library": "blockchains,modules"
     }
     response = await client.get(
         f"{config.threexpl_api_base_url}/",
@@ -82,6 +85,85 @@ async def fetch_block(blockchain: str, height: int):
     )
     response.raise_for_status()
     return response.json()
+
+
+async def fetch_block_events(blockchain: str, module: str, height: int, limit: int = 1000, page: int = 0):
+    params = {
+        "data": "block,events",
+        "limit": limit,
+        "page": page,
+        "from": module,
+        "library": "currencies,rates(usd)",
+    }
+    response = await client.get(
+        f"{config.threexpl_api_base_url}/{blockchain}/block/{height}",
+        params=params,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+async def fetch_transaction_events(blockchain: str, module: str, transaction_hash: str,
+                                   limit: int = 1000, page: int = 0):
+    params = {
+        "data": "transaction,events",
+        "limit": limit,
+        "page": page,
+        "from": module,
+        "library": "currencies,rates(usd)"
+    }
+
+    response = await client.get(
+        f"{config.threexpl_api_base_url}/{blockchain}/transaction/{transaction_hash}",
+        params=params,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+# can be multiple separated, or can be merged though.
+async def fetch_address_data(blockchain: str, module: str, address: str, source: AddressDataSource,
+                             # segment: Optional[str] = None,
+                             limit: int = 1000, page: int = 0):
+    params = {
+        "data": source.value,
+        "limit": limit,
+        "page": page,
+        "from": module,
+        "library": "currencies,rates(usd)",
+    }
+    # if segment is not None:
+    #     params["segment"] = segment
+
+    response = await client.get(
+        f"{config.threexpl_api_base_url}/{blockchain}/address/{address}",
+        params=params,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+async def fetch_address_balances(blockchain: str, module: str, address: str, source: AddressDataSource,
+                                 limit: int = 1000, page: int = 0):
+    # limit doesn't work at balances
+    address_data = await fetch_address_data(blockchain, module, address, source, limit, page)
+    balances = address_data['data']['balances'][module]
+    currencies_library = address_data['library']['currencies']
+    rates_library = address_data['library']['rates']['now']
+
+    unwrapped_balance_data = []
+    if not balances:
+        return unwrapped_balance_data
+    for currency, currency_info in balances.items():
+        unwrapped_balance_data.append({
+            "currency": currency,
+            "symbol": currencies_library[currency]["symbol"],
+            "decimals": currencies_library[currency]["decimals"],
+            "balance": currency_info['balance'],
+            "is_verified": rates_library[currency]['usd'] is not None
+        })
+
+    return unwrapped_balance_data
 
 
 if __name__ == "__main__":
