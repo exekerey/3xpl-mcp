@@ -10,6 +10,7 @@ from src.core.utils import collect_all_pages
 # current state of actions:
 #  test each tool with Claude, see if it runs, get some edge cases
 
+# todo: dynamic extra. Different blockchains have different extras.
 # todo: tune tool descriptions better - few issues:
 #           - not using is_verified when checking balances
 #           - not passing modules correctly unless provided with exact module name
@@ -23,17 +24,10 @@ from src.core.utils import collect_all_pages
 # TODO: when going out of allowed range for pages, notifying LLM about boundaries.
 #   for example telling the time of first event
 
-# TODO: extra has more meanings and you gotta paste that somehow into tools.
-
 # todo: docstrings actually can be assigned separately:
 #  `fn.__doc__ = "description"` and this could be reducing some duplication.
 #  so having modularizing descriptions based on fields, and pasting that via formatting if it's needed for the tool.
 
-
-# TODO: having usd rate in table for llm to be able to operate within the dimension of fiat value.
-#  "can you give me the biggest in terms of usd transaction of this address?"
-#  (so even 5 wei > 12312314213123123123 shcoin)
-# todo: document decimals and exchange rate.
 
 async def aggregate_block_transfers(blockchain: str, module: str, height: int, sql_query: str):
     """
@@ -46,10 +40,23 @@ async def aggregate_block_transfers(blockchain: str, module: str, height: int, s
             or contract address prefixed with the module name and separated by a slash
             (e.g. `ethereum-erc-20/0xda...c7` (address shortened for simplicity)
         - currency_symbol: currency symbol/ticker) in uppercase.
+        - currency_decimals: number of decimals for the currency. 0 if the currency is indivisible(nft).
         - currency_verified: boolean indicating whether the currency is widely accepted and listed on major exchanges(indicates that a currency is not a scam or copy)
-        - effect: amount in the smallest units as REAL type. Positive if gained, negative if spent.
+        - exchange_rate: exchange rate for the currency in USD. Null if the currency is not listed anywhere yet.
+        - effect: amount in the smallest units as REAL type. Positive if the address is receiver, negative if is sender.
         - failed: boolean indicating whether transaction failed
-        - extra: special mark as text. 'f' for miner fee, 'b' for burnt fee, null for regular transfers
+        - extra: Special marker describing the type of transfer as tet field. Possible values:
+            'r' for block reward
+            'f' for miner fee
+            'b' for burnt fee
+            'i' for uncle inclusion reward
+            'u' for uncle reward
+            'c' for contract creation
+            'd' for contract destruction
+            null for Regular/ordinary transfer (no special type)
+            NOTICE: in UTXO blockchains transfers extra will be always null. Here are other traits of transfers:
+            - in UTXO blockchains, miner fee(including block reward) will be the sum of transfers where special address `the-void` is receiver.
+            - block reward is the transfer where special address `the-void` is sender. Keep in mind that this also includes the miner fees.
     Args:
         blockchain (str): blockchain to fetch from
         module (str): module of the blockchain.
@@ -87,10 +94,23 @@ async def aggregate_transaction_transfers(blockchain: str, module: str, transact
             or contract address prefixed with the module name and separated by a slash
             (e.g. `ethereum-erc-20/0xda...c7` (address shortened for simplicity)
         - currency_symbol: currency symbol/ticker) in uppercase.
+        - currency_decimals: number of decimals for the currency. 0 if the currency is indivisible(nft).
         - currency_verified: boolean indicating whether the currency is widely accepted and listed on major exchanges(indicates that a currency is not a scam or copy)
-        - effect: amount in the smallest units as REAL type. Positive if gained, negative if spent.
+        - exchange_rate: exchange rate for the currency in USD. Null if the currency is not listed anywhere yet.
+        - effect: amount in the smallest units as REAL type. Positive if the address is receiver, negative if is sender.
         - failed: boolean indicating whether transaction failed
-        - extra: special mark as text. 'f' for miner fee, 'b' for burnt fee, null for regular transfers
+        - extra: Special marker describing the type of transfer as tet field. Possible values:
+            'r' for block reward
+            'f' for miner fee
+            'b' for burnt fee
+            'i' for uncle inclusion reward
+            'u' for uncle reward
+            'c' for contract creation
+            'd' for contract destruction
+            null for Regular/ordinary transfer (no special type)
+            NOTICE: in UTXO blockchains transfers extra will be always null. Here are other traits of transfers:
+            - in UTXO blockchains, miner fee(including block reward) will be the sum of transfers where special address `the-void` is receiver.
+            - block reward is the transfer where special address `the-void` is sender. Keep in mind that this also includes the miner fees.
     Args:
         blockchain (str): blockchain to fetch from
         module (str): module of the blockchain.
@@ -131,11 +151,23 @@ async def aggregate_address_mempool(blockchain: str, module: str, address: str, 
             or contract address prefixed with the module name and separated by a slash
             (e.g. `ethereum-erc-20/0xda...c7` (address shortened for simplicity)
         - currency_symbol: currency symbol/ticker) in uppercase.
+        - currency_decimals: number of decimals for the currency. 0 if the currency is indivisible(nft).
         - currency_verified: boolean indicating whether the currency is widely accepted and listed on major exchanges(indicates that a currency is not a scam or copy)
-        - effect: amount in the smallest units as REAL type. Positive if gained, negative if spent.
+        - exchange_rate: exchange rate for the currency in USD. Null if the currency is not listed anywhere yet.
+        - effect: amount in the smallest units as REAL type. Positive if the address is receiver, negative if is sender.
         - failed: boolean indicating whether transaction failed or null if not applicable
-        - extra: special mark as text. 'f' for miner fee, 'b' for burnt fee, null for regular transfers
-    Args:
+        - extra: Special marker describing the type of transfer as tet field. Possible values:
+            'r' for block reward
+            'f' for miner fee
+            'b' for burnt fee
+            'i' for uncle inclusion reward
+            'u' for uncle reward
+            'c' for contract creation
+            'd' for contract destruction
+            null for Regular/ordinary transfer (no special type)
+            NOTICE: in UTXO blockchains transfers extra will be always null. Here are other traits of transfers:
+            - in UTXO blockchains, miner fee(including block reward) will be the sum of transfers where special address `the-void` is receiver.
+            - block reward is the transfer where special address `the-void` is sender. Keep in mind that this also includes the miner fees.    Args:
         blockchain (str): blockchain to fetch from
         module (str): module of the blockchain.
             Must always be prepended with blockchain name. Example: "arbitrum-one-erc-20".
@@ -176,11 +208,13 @@ async def aggregate_address_balances(blockchain: str, module: str, address: str,
             Stored as REAL type.
             Null if the currency is non-fungible.
         - is_verified: boolean indicating whether the currency is widely accepted and listed on major exchanges(indicates that a currency is not a scam or copy)
+        - exchange_rate: exchange rate for the currency in USD. Null if the currency is not listed anywhere yet.
         in case if you query main module, there will be only row(example with `ethereum-main`):
         currency - "ethereum"
         symbol - "ETH"
         decimals - 18
         balance - "237558121960475169592"
+        etc...
 
         but when you query other modules, the currency will be in form of an address and prepended with module name:
 
@@ -228,10 +262,23 @@ async def aggregate_address_transfers(blockchain: str, module: str, address: str
             or contract address prefixed with the module name and separated by a slash
             (e.g. `ethereum-erc-20/0xda...c7` (address shortened for simplicity)
         - currency_symbol: currency symbol/ticker) in uppercase.
+        - currency_decimals: number of decimals for the currency. 0 if the currency is indivisible(nft).
         - currency_verified: boolean indicating whether the currency is widely accepted and listed on major exchanges(indicates that a currency is not a scam or copy)
-        - effect: amount in the smallest units as REAL type. Positive if gained, negative if spent.
+        - effect: amount in the smallest units as REAL type. Positive if the address is receiver, negative if is sender.
+        - exchange_rate: exchange rate for the currency in USD. Null if the currency is not listed anywhere yet.
         - failed: boolean indicating whether transaction failed
-        - extra: special mark as text. 'f' for miner fee, 'b' for burnt fee, null for regular transfers
+        - extra: Special marker describing the type of transfer as tet field. Possible values:
+            'r' for block reward
+            'f' for miner fee
+            'b' for burnt fee
+            'i' for uncle inclusion reward
+            'u' for uncle reward
+            'c' for contract creation
+            'd' for contract destruction
+            null for Regular/ordinary transfer (no special type)
+            NOTICE: in UTXO blockchains transfers extra will be always null. Here are other traits of transfers:
+            - in UTXO blockchains, miner fee(including block reward) will be the sum of transfers where special address `the-void` is receiver.
+            - block reward is the transfer where special address `the-void` is sender. Keep in mind that this also includes the miner fees.
     Args:
         blockchain (str): blockchain to fetch from
         module (str): module of the blockchain

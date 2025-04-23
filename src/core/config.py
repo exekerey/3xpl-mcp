@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings
 class Config(BaseSettings):
     threexpl_api_key: str = ""
     threexpl_api_base_url: str = "https://api.3xpl.com"
+    pagination_limit: int = 25
 
     @field_validator('threexpl_api_base_url', mode='after')
     def set_api_base_url(cls, v, info: ValidationInfo):

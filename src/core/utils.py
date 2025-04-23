@@ -2,6 +2,8 @@ from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal, getcontext
 
+from src.core.config import config
+
 getcontext().prec = 30
 
 
@@ -64,16 +66,25 @@ async def collect_all_pages(async_fetcher, data_keys: list[str], get_currency_in
                 if currency_timestamp_rates[currency_id]:
                     data_chunk['currency_verified'] = True
 
-                    if data_chunk.get('timestamp'):
-                        data_chunk['exchange_rate'] = currency_timestamp_rates[currency_id][data_chunk['timestamp']]
+                    if data_chunk.get('time'):  # or not data_chunk.get('block'):
+                        data_chunk['exchange_rate'] = currency_timestamp_rates[currency_id][data_chunk['time']]['usd']
+                    elif not data_chunk.get('block'):
+                        data_chunk['exchange_rate'] = \
+                            currency_timestamp_rates[currency_id][data['data']['block']['time']]['usd']
                     else:
-                        data_chunk['exchange_rate'] = currency_timestamp_rates[currency_id]['now']
+                        data_chunk['exchange_rate'] = currency_timestamp_rates[currency_id]['now']['usd']
                 else:
                     data_chunk['currency_verified'] = False
 
+        for data_chunk in required_data:
+            if "transaction" not in data_chunk:
+                break
+            data_chunk['transaction_hash'] = data_chunk['transaction']
+            del data_chunk['transaction']
+
         all_pages.extend(required_data)
 
-        if stop_after_first or current_page > 10:
+        if stop_after_first or current_page > config.pagination_limit:
             break
 
         current_page += 1
