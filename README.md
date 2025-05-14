@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/exekerey-3xpl-mcp-badge.png)](https://mseep.ai/app/exekerey-3xpl-mcp)
+
 # 3xpl.com JSON API MCP server
 
 # Overview
