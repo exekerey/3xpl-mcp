@@ -3,10 +3,16 @@ Tests
 For now they are just runners
 """
 import asyncio
+import sys
 import time
+from pathlib import Path
 
-from src.tools import aggregate_address_transfers, aggregate_address_mempool, aggregate_address_balances, \
-    aggregate_transaction_transfers
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.tools.address_aggregates import aggregate_address_transfers, aggregate_address_mempool, aggregate_address_balances
+from src.tools.transaction_aggregates import aggregate_transaction_transfers
 
 loop = asyncio.new_event_loop()
 print(loop.run_until_complete(

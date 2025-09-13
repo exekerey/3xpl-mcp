@@ -1,7 +1,9 @@
 from src.core.connector import search_string
+from .registry import mcp_tool
 
 
-async def detect_blockchains(data: str) -> [str]:
+@mcp_tool
+async def detect_blockchains(data: str) -> list[str]:
     """
     Detect blockchains of a data string.
     :param data: Data string to detect blockchains of. Can be an address, a transaction id or an ENS domain.

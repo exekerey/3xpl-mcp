@@ -1,7 +1,9 @@
 from src.core.connector import fetch_address
 from src.core.utils import format_amount, reformat_time
+from .registry import mcp_tool
 
 
+@mcp_tool
 async def get_address_overview(blockchain: str, address: str) -> str:
     """
     Get main information about an address in requested blockchain.

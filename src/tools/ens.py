@@ -1,6 +1,8 @@
 from src.core.connector import search_string
+from .registry import mcp_tool
 
 
+@mcp_tool
 async def resolve_ens_domain(domain: str) -> str:
     """
     Resolve the ENS domain to EVM address

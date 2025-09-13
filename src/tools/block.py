@@ -1,7 +1,9 @@
 from src.core.connector import fetch_stats, fetch_block
 from src.core.utils import reformat_time
+from .registry import mcp_tool
 
 
+@mcp_tool
 async def get_block_overview(blockchain: str, height: int):
     """
     Get main information about a block in requested blockchain.
@@ -37,6 +39,7 @@ async def get_block_info(blockchain: str, height: int):
     return block_info
 
 
+@mcp_tool
 async def get_latest_block(blockchain: str):
     """
     Fetch the height(block id) of the latest(best) block in the requested blockchain.
