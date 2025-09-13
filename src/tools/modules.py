@@ -1,6 +1,8 @@
 from src.core.connector import fetch_stats
+from .registry import mcp_tool
 
 
+@mcp_tool
 async def list_blockchains_and_modules() -> dict:
     """
     Fetch all available blockchains and their modules in the API.

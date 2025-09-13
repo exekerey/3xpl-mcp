@@ -1,5 +1,6 @@
 from src.core.connector import fetch_transaction, fetch_stats
 from src.core.utils import reformat_time
+from .registry import mcp_tool
 
 
 async def get_transaction_info(blockchain: str, transaction_hash: str):
@@ -7,7 +8,8 @@ async def get_transaction_info(blockchain: str, transaction_hash: str):
     return transaction_info
 
 
-async def get_transactions_count_24h(blockchain: str):
+@mcp_tool
+async def get_events_count_24h(blockchain: str):
     """
     Get count of individual transfers(not transactions) in the given blockchain for last 24 hours.
     :param blockchain: Lowercase blockchain name with dashes instead of spaces.
@@ -17,7 +19,8 @@ async def get_transactions_count_24h(blockchain: str):
     return stats['data']['blockchains'][blockchain]['events_24h']
 
 
-async def get_transaction_fee_24h_usd(blockchain: str) -> int:
+@mcp_tool
+async def get_average_fee_24h_usd(blockchain: str) -> int:
     """
     Get average transaction fee(recommended for quick confirmation) in the given blockchain for last 24 hours in USD.
     :param blockchain: Lowercase blockchain name with dashes instead of spaces.
@@ -27,7 +30,8 @@ async def get_transaction_fee_24h_usd(blockchain: str) -> int:
     return stats['data']['blockchains'][blockchain]['average_fee_24h']['usd']
 
 
-async def get_mempool_transactions_count(blockchain: str) -> dict[str, int]:
+@mcp_tool
+async def get_mempool_events_count(blockchain: str) -> dict[str, int]:
     """
     Get current count of individual transfers(not transactions) in requested blockchain
     :param blockchain: Lowercase blockchain name with dashes instead of spaces.
@@ -37,6 +41,7 @@ async def get_mempool_transactions_count(blockchain: str) -> dict[str, int]:
     return stats['data']['blockchains'][blockchain]['mempool_events']
 
 
+@mcp_tool
 async def get_transaction_overview(blockchain: str, transaction_hash: str):
     """
     Get main information about a transaction in a certain blockchain by its hash(id)
